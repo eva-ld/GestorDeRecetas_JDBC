@@ -15,10 +15,11 @@ public class GestionRecetas {
 
         try (Connection con = ConexionBD.getConexion()) {
 
-            System.out.println("Conexión establecida correctamente.");
+            System.out.println("Conexión establecida correctamente.\n");
 
             do {
-                System.out.println("\n--- GESTOR DE RECETAS ---");
+                System.out.println("  GESTOR DE RECETAS EVA LOZANO     ");
+                System.out.println("--------------------------------");
                 System.out.println("1. Mostrar todas las recetas");
                 System.out.println("2. Buscar receta por ID");
                 System.out.println("3. Añadir receta");
@@ -26,6 +27,7 @@ public class GestionRecetas {
                 System.out.println("5. Eliminar receta");
                 System.out.println("6. Buscar receta por nombre");
                 System.out.println("0. Salir");
+                System.out.println("--------------------------------");
                 System.out.print("Introduce una opción: ");
 
                 opcion = sc.nextInt();
@@ -51,21 +53,35 @@ public class GestionRecetas {
                         buscarRecetaNombre(con, sc);
                         break;
                     case 0:
+                        System.out.println("\nHAS SELECCIONADO SALIR");
                         System.out.println("Saliendo del programa...");
                         break;
                     default:
-                        System.out.println("Opción incorrecta.");
+                        System.out.println("\nERROR: Opción incorrecta.");
                 }
 
             } while (opcion != 0);
 
         } catch (SQLException e) {
-
-            System.out.println("Error: " + e.getMessage());
-
+            System.out.println("ERROR: " + e.getMessage());
         }
 
         sc.close();
+    }
+
+
+    // METODO PARA MOSTRAR LOS DATOS DE UNA RECETA
+
+    public static void mostrarDatosReceta(Receta receta) {
+
+        System.out.println(" " + receta.getNombre().toUpperCase());
+        System.out.println(" - CATEGORÍA: " + receta.getCategoria());
+        System.out.println(" - TIEMPO DE PREPARACIÓN: " +
+                receta.getTiempoPreparacion() + " minutos");
+        System.out.println(" - NIVEL DE DIFICULTAD: " +
+                receta.getDificultad());
+        System.out.println(" - CANTIDAD DE RACIONES: " +
+                receta.getRaciones());
     }
 
 
@@ -73,27 +89,37 @@ public class GestionRecetas {
 
     public static void mostrarRecetas(Connection con) {
 
+        System.out.println("\nHAS SELECCIONADO MOSTRAR TODAS LAS RECETAS");
+
         String sql = "SELECT * FROM recetas";
 
         try (Statement stmt = con.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
 
+            int contador = 0;
+
             while (rs.next()) {
 
                 Receta receta = new Receta(
-                        rs.getInt("tiempo_preparacion"),
-                        rs.getString("categoria"),
-                        rs.getString("nombre"),
                         rs.getInt("id"),
+                        rs.getString("nombre"),
+                        rs.getString("categoria"),
+                        rs.getInt("tiempo_preparacion"),
                         rs.getString("dificultad"),
                         rs.getInt("raciones")
                 );
 
-                System.out.println(receta);
+                System.out.println("\nReceta (" + receta.getId() + ")");
+                mostrarDatosReceta(receta);
+
+                contador++;
             }
 
+            System.out.println("\n--------------------------------");
+            System.out.println("TOTAL DE RECETAS: " + contador);
+
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("ERROR: " + e.getMessage());
         }
     }
 
@@ -101,6 +127,8 @@ public class GestionRecetas {
     // 2. BUSCAR RECETA POR ID
 
     public static void buscarRecetaID(Connection con, Scanner sc) {
+
+        System.out.println("\nHAS SELECCIONADO BUSCAR RECETA POR ID");
 
         System.out.print("Introduce el ID de la receta: ");
         int id = sc.nextInt();
@@ -117,23 +145,26 @@ public class GestionRecetas {
                 if (rs.next()) {
 
                     Receta receta = new Receta(
-                            rs.getInt("tiempo_preparacion"),
-                            rs.getString("categoria"),
-                            rs.getString("nombre"),
                             rs.getInt("id"),
+                            rs.getString("nombre"),
+                            rs.getString("categoria"),
+                            rs.getInt("tiempo_preparacion"),
                             rs.getString("dificultad"),
                             rs.getInt("raciones")
                     );
 
-                    System.out.println(receta);
+                    System.out.println("\nReceta buscada (" +
+                            receta.getId() + ")");
+
+                    mostrarDatosReceta(receta);
 
                 } else {
-                    System.out.println("No se ha encontrado la receta.");
+                    System.out.println("\nNo se ha encontrado ninguna receta con ID " + id + ".");
                 }
             }
 
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("ERROR: " + e.getMessage());
         }
     }
 
@@ -143,20 +174,22 @@ public class GestionRecetas {
     public static void anadirReceta(Connection con, Scanner sc)
             throws SQLException {
 
+        System.out.println("\nHAS SELECCIONADO AÑADIR UNA RECETA");
+
         System.out.print("Introduce el nombre: ");
         String nombre = sc.nextLine();
 
         System.out.print("Introduce la categoría: ");
         String categoria = sc.nextLine();
 
-        System.out.print("Introduce el tiempo de preparación: ");
+        System.out.print("Introduce el tiempo de preparación (minutos): ");
         int tiempoPreparacion = sc.nextInt();
         sc.nextLine();
 
-        System.out.print("Introduce la dificultad: ");
+        System.out.print("Introduce el nivel de dificultad: ");
         String dificultad = sc.nextLine();
 
-        System.out.print("Introduce el número de raciones: ");
+        System.out.print("Introduce la cantidad de raciones: ");
         int raciones = sc.nextInt();
         sc.nextLine();
 
@@ -191,15 +224,23 @@ public class GestionRecetas {
             // Confirmamos las dos operaciones
             con.commit();
 
-            System.out.println("Receta añadida correctamente.");
+            System.out.println("\nRECETA AÑADIDA CORRECTAMENTE");
+
+            System.out.println("\nNueva receta:");
+            System.out.println(" " + nombre.toUpperCase());
+            System.out.println(" - CATEGORÍA: " + categoria);
+            System.out.println(" - TIEMPO DE PREPARACIÓN: " +
+                    tiempoPreparacion + " minutos");
+            System.out.println(" - NIVEL DE DIFICULTAD: " + dificultad);
+            System.out.println(" - CANTIDAD DE RACIONES: " + raciones);
 
         } catch (SQLException e) {
 
             // Deshacemos los cambios si se produce un error
             con.rollback();
 
-            System.out.println("No se ha podido añadir la receta.");
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("\nNO SE HA PODIDO AÑADIR LA RECETA");
+            System.out.println("ERROR: " + e.getMessage());
         }
 
         // Volvemos a activar la confirmación automática
@@ -211,35 +252,80 @@ public class GestionRecetas {
 
     public static void modificarReceta(Connection con, Scanner sc) {
 
+        System.out.println("\nHAS SELECCIONADO MODIFICAR UNA RECETA");
+
         System.out.print("Introduce el ID de la receta: ");
         int id = sc.nextInt();
-
-        System.out.print("Introduce el nuevo tiempo de preparación: ");
-        int tiempoPreparacion = sc.nextInt();
-
-        System.out.print("Introduce el nuevo número de raciones: ");
-        int raciones = sc.nextInt();
         sc.nextLine();
+
+        String consulta = "SELECT * FROM recetas WHERE id = ?";
 
         String sql = "UPDATE recetas " +
                 "SET tiempo_preparacion = ?, raciones = ? WHERE id = ?";
 
-        try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+        try (PreparedStatement pstmtConsulta = con.prepareStatement(consulta);
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
 
-            pstmt.setInt(1, tiempoPreparacion);
-            pstmt.setInt(2, raciones);
-            pstmt.setInt(3, id);
+            pstmtConsulta.setInt(1, id);
 
-            int filas = pstmt.executeUpdate();
+            try (ResultSet rs = pstmtConsulta.executeQuery()) {
 
-            if (filas > 0) {
-                System.out.println("Receta modificada correctamente.");
-            } else {
-                System.out.println("No se ha encontrado la receta.");
+                if (rs.next()) {
+
+                    Receta receta = new Receta(
+                            rs.getInt("id"),
+                            rs.getString("nombre"),
+                            rs.getString("categoria"),
+                            rs.getInt("tiempo_preparacion"),
+                            rs.getString("dificultad"),
+                            rs.getInt("raciones")
+                    );
+
+                    System.out.println("\nReceta seleccionada (" +
+                            receta.getId() + ")");
+
+                    System.out.println("\nINTRODUCE LOS NUEVOS DATOS");
+
+                    System.out.print("Introduce el nuevo tiempo de preparación " + "(tiempo actual: " + receta.getTiempoPreparacion() + " minutos): ");
+                    int tiempoPreparacion = sc.nextInt();
+
+                    System.out.print("Introduce la nueva cantidad de raciones " + "(raciones actuales: " + receta.getRaciones() + "): ");
+
+                    int raciones = sc.nextInt();
+                    sc.nextLine();
+
+                    pstmt.setInt(1, tiempoPreparacion);
+                    pstmt.setInt(2, raciones);
+                    pstmt.setInt(3, id);
+
+                    int filas = pstmt.executeUpdate();
+
+                    if (filas > 0) {
+
+                        System.out.println("\nRECETA MODIFICADA CORRECTAMENTE");
+
+                        System.out.println("\nReceta modificada (" + id + ")");
+                        System.out.println(" " + receta.getNombre().toUpperCase());
+
+                        System.out.println(" - CATEGORÍA: " + receta.getCategoria());
+
+                        System.out.println(" - TIEMPO DE PREPARACIÓN: " + receta.getTiempoPreparacion() + " --> " + tiempoPreparacion + " minutos");
+
+                        System.out.println(" - NIVEL DE DIFICULTAD: " + receta.getDificultad());
+
+                        System.out.println(" - CANTIDAD DE RACIONES: " + receta.getRaciones() + " --> " + raciones);
+
+                    } else {
+                        System.out.println("\nNo se ha modificado la receta.");
+                    }
+
+                } else {
+                    System.out.println("\nNo se ha encontrado ninguna receta con ID " + id + ".");
+                }
             }
 
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("ERROR: " + e.getMessage());
         }
     }
 
@@ -248,6 +334,8 @@ public class GestionRecetas {
 
     public static void eliminarReceta(Connection con, Scanner sc)
             throws SQLException {
+
+        System.out.println("\nHAS SELECCIONADO ELIMINAR UNA RECETA");
 
         System.out.print("Introduce el ID de la receta: ");
         int id = sc.nextInt();
@@ -278,20 +366,23 @@ public class GestionRecetas {
 
                 con.commit();
 
-                System.out.println("Receta eliminada correctamente.");
+                System.out.println("\nRECETA ELIMINADA CORRECTAMENTE");
+                System.out.println(" - ID DE LA RECETA ELIMINADA: " + id);
+                System.out.println(" - ESTADÍSTICAS: Actualizadas correctamente");
 
             } else {
 
                 con.rollback();
 
-                System.out.println("No se ha encontrado la receta.");
+                System.out.println("\nNo se ha encontrado ninguna receta con ID " + id + ".");
             }
 
         } catch (SQLException e) {
 
             con.rollback();
 
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("\nNO SE HA PODIDO ELIMINAR LA RECETA");
+            System.out.println("ERROR: " + e.getMessage());
         }
 
         con.setAutoCommit(true);
@@ -301,6 +392,8 @@ public class GestionRecetas {
     // 6. BUSCAR RECETA POR NOMBRE CON CALLABLESTATEMENT
 
     public static void buscarRecetaNombre(Connection con, Scanner sc) {
+
+        System.out.println("\nHAS SELECCIONADO BUSCAR RECETA POR NOMBRE");
 
         System.out.print("Introduce el nombre de la receta: ");
         String nombre = sc.nextLine();
@@ -318,26 +411,28 @@ public class GestionRecetas {
                 while (rs.next()) {
 
                     Receta receta = new Receta(
-                            rs.getInt("tiempo_preparacion"),
-                            rs.getString("categoria"),
-                            rs.getString("nombre"),
                             rs.getInt("id"),
+                            rs.getString("nombre"),
+                            rs.getString("categoria"),
+                            rs.getInt("tiempo_preparacion"),
                             rs.getString("dificultad"),
                             rs.getInt("raciones")
                     );
 
-                    System.out.println(receta);
+                    System.out.println("\nReceta buscada (" + receta.getId() + ")");
+
+                    mostrarDatosReceta(receta);
 
                     encontrada = true;
                 }
 
                 if (!encontrada) {
-                    System.out.println("No se ha encontrado la receta.");
+                    System.out.println("\nNo se ha encontrado la receta " + nombre.toUpperCase() + ".");
                 }
             }
 
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("ERROR: " + e.getMessage());
         }
     }
 }
